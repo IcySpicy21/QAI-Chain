@@ -26,13 +26,14 @@ class QuantumLayer(nn.Module):
         for i in range(x.shape[0]):
 
             out = self.qc.forward(x[i], self.weights)
-
-            # Robustly convert QNode output to float or numpy before as_tensor
             import numpy as np
+            # Convert to numpy, then to float32 for PyTorch
             if isinstance(out, torch.Tensor):
                 out = out.detach().cpu().numpy()
             if isinstance(out, (np.generic, np.ndarray)) and out.shape == ():
                 out = out.item()
-            outputs.append(torch.as_tensor(out, dtype=x.dtype))
+            # Always cast to float32 for PyTorch compatibility
+            out = np.array(out, dtype=np.float32)
+            outputs.append(torch.as_tensor(out, dtype=torch.float32))
 
         return torch.stack(outputs)

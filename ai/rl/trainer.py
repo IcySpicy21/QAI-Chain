@@ -77,11 +77,14 @@ def train(blockchain, episodes=50):
                 best_checkpoint_path,
             )
 
-        print(
-            f"Episode {ep} | Reward: {total_reward:.2f} | "
-            f"MA{ma_window}: {moving_avg_reward:.2f} | "
-            f"Difficulty: {blockchain.difficulty} | "
-            f"Entropy: {agent.entropy_coef:.4f}"
-        )
+        try:
+            print(
+                f"Episode {ep} | Reward: {total_reward:.2f} | "
+                f"MA{ma_window}: {moving_avg_reward:.2f} | "
+                f"Difficulty: {blockchain.difficulty} | "
+                f"Entropy: {agent.entropy_coef:.4f}"
+            )
+        except BrokenPipeError:
+            pass
 
     print(f"Best MA{ma_window}: {best_ma_reward:.2f} | Checkpoint: {best_checkpoint_path}")

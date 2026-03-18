@@ -22,15 +22,15 @@ class PPOAgent:
 
         state = torch.tensor(state).float().unsqueeze(0)
 
-        logits = self.policy(state)
+        mean, std = self.policy(state)
 
-        probs = torch.softmax(logits, dim=-1)
-
-        dist = torch.distributions.Categorical(probs)
+        dist = torch.distributions.Normal(mean, std)
 
         action = dist.sample()
 
-        return action.item(), dist.log_prob(action)
+        log_prob = dist.log_prob(action)
+
+        return action.item(), log_prob
 
     def compute_returns(self, rewards):
 
@@ -43,4 +43,33 @@ class PPOAgent:
             returns.insert(0, G)
 
         return torch.tensor(returns)
-        
+
+    def ppo_update(self, states, actions, old_log_probs, returns):
+
+        states = torch.tensor(states).float()
+        actions = torch.tensor(actions).float()
+        old_log_probs = torch.stack(old_log_probs).detach()
+        returns = returns.detach()
+
+        mean, std = self.policy(states)
+
+        dist = torch.distributions.Normal(mean, std)
+
+        new_log_probs = dist.log_prob(actions)
+
+        ratio = torch.exp(new_log_probs - old_log_probs)
+
+        clipped_ratio = torch.clamp(ratio, 1 - self.eps_clip, 1 + self.eps_clip)
+
+        policy_loss = -torch.min(ratio * returns, clipped_ratio * returns).mean()
+
+        value_pred = self.value(states).squeeze()
+
+        value_loss = (returns - value_pred).pow(2).mean()
+
+        loss = policy_loss + 0.5 * value_loss
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+            

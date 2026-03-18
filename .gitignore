@@ -20,3 +20,4 @@ build/
 *.whl
 *.tar.gz
 *.zip
+*.pt

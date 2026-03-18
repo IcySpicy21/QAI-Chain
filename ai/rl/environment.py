@@ -45,13 +45,14 @@ class BlockchainEnv:
         ], dtype=np.float32)
 
     def step(self, action):
+        delta = float(np.clip(action, -1.0, 1.0))
 
-        delta = float(action)
-
-        self.blockchain.difficulty = max(
-            1,
-            self.blockchain.difficulty + delta
+        next_difficulty = np.clip(
+            float(self.blockchain.difficulty) + delta,
+            self.min_difficulty,
+            self.max_difficulty,
         )
+        self.blockchain.difficulty = int(round(next_difficulty))
 
         reward = self.compute_reward()
 
@@ -68,29 +69,23 @@ class BlockchainEnv:
         num_blocks = len(chain)
 
         if num_blocks == 0:
-            return 0
+            return 0.0
 
         block_sizes = [len(b.transactions) for b in chain]
 
         throughput = sum(block_sizes) / num_blocks
 
-        # simulate latency (inverse of difficulty)
         latency = 1.0 / max(1, self.blockchain.difficulty)
-
-        # stability penalty (fake for now, extend later)
-        stability_penalty = 0.1 * self.blockchain.difficulty
-
-        # decentralization proxy (future: node count)
         decentralization = 1.0
 
-        # -----------------------------
-        # Multi-objective reward
-        # -----------------------------
+        # Keep a smooth optimum around target difficulty.
+        target_penalty = 0.2 * abs(self.blockchain.difficulty - self.target_difficulty)
+
         reward = (
-            1.5 * throughput
-            + 1.0 * latency
+            1.0 * throughput
+            + 0.8 * latency
             + 0.5 * decentralization
-            - stability_penalty
+            - target_penalty
         )
 
         return reward

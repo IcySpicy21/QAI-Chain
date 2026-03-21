@@ -62,6 +62,26 @@ PYTHONPATH=. .venv/bin/python -m pytest -q && \
 PYTHONPATH=. .venv/bin/python scripts/benchmark_quick.py
 ```
 
+## One-Command Recruiter Demo
+
+```bash
+make showcase
+```
+
+This runs a full quick showcase in one go:
+
+- project healthcheck,
+- test suite,
+- model quick benchmark,
+- blockchain smoke demo (signed tx + mined block),
+- and prints key assets to present.
+
+Optional paper build in the same flow:
+
+```bash
+PYTHONPATH=. .venv/bin/python scripts/showcase.py --with-paper
+```
+
 ## Core Validation Commands
 
 ```bash

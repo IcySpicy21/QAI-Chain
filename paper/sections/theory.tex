@@ -1,6 +1,8 @@
 \section{Theory: Safety and Stability Guarantees}
 
-Let $s_t$ be the observed state, $a_t^{\pi}$ the learned policy action, $a_t^{h}$ the fallback heuristic action, and $u_q(s_t)$ the quantum uncertainty estimate. Let the switching rule be
+This section formalizes the mechanism-level guarantees of the proposed controller under explicit assumptions. The intent is to clarify why the architecture behaves as observed in simulation, not to claim assumption-free optimality theorems for all deployment settings.
+
+Let $s_t$ be the observed state, $a_t^{\pi}$ the learned policy action, $a_t^{h}$ the fallback heuristic action, and $u_q(s_t)$ the quantum-inspired uncertainty estimate. Let the switching rule be
 \[
 \hat a_t=
 \begin{cases}
@@ -10,11 +12,11 @@ a_t^{\pi}, & u_q(s_t)\le\tau_q.
 \]
 Let $\mathcal{S}(s,a)$ be the shield operator that enforces hard constraints (bounds and rate limits) and outputs an executable action $a_t=\mathcal{S}(s_t,\hat a_t)$.
 
-\paragraph{Theorem 1 (Safety Bound with Shielded Quantum Gating).}
+\paragraph{Theorem 1 (Safety Bound with Shielded Quantum-Inspired Gating).}
 Assume the shield is complete for hard constraints, i.e., for every state-action pair $(s,a)$ the output $\mathcal{S}(s,a)$ satisfies all hard safety constraints. Then:
 \begin{enumerate}
 	\item Within the simulation environment, and assuming a bug-free and complete shield implementation, the probability of catastrophic action is zero.\footnote{This is an in-simulator guarantee, not a real-world absolute guarantee. Deployment can fail due to software defects, model mismatch, sensing faults, or incomplete constraint encoding; therefore operational risk controls remain necessary.}
-	\item Let $Q_t(\cdot)$ be one-step expected utility and let $a_t^{\star}=\arg\max\{Q_t(a_t^{\pi}),Q_t(a_t^h)\}$. If quantum uncertainty calibration error is bounded by $\epsilon_{\text{quantum}}$ and the shield induces utility deviation at most $\epsilon_{\text{shield}}$, then
+	\item Let $Q_t(\cdot)$ be one-step expected utility and let $a_t^{\star}=\arg\max\{Q_t(a_t^{\pi}),Q_t(a_t^h)\}$. If quantum-inspired uncertainty calibration error is bounded by $\epsilon_{\text{quantum}}$ and the shield induces utility deviation at most $\epsilon_{\text{shield}}$, then
 	\[
 	\mathbb{E}[Q_t(a_t^{\star})-Q_t(a_t)] \le \epsilon_{\text{quantum}}+\epsilon_{\text{shield}}.
 	\]
@@ -130,4 +132,4 @@ Equivalently, if one tracks the per-window expectation $\bar v(\pi):=\mathbb{E}[
 \]
 Therefore risk-penalized improvement with near-constant nominal return enforces non-increasing return variance.
 
-These theorems justify why the combined policy (quantum-gated fallback + shield + risk shaping) improves safety behavior while preserving competitive reward in adversarial governance control.
+Taken together, these results provide a conditional explanation for the observed behavior of the combined policy (quantum-inspired uncertainty-gated fallback + shield + risk shaping): when shield completeness and calibration assumptions are approximately satisfied, degradation remains controlled and safety behavior is more stable under shift.

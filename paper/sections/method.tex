@@ -34,7 +34,7 @@ If a post-check still violates a hard safety predicate (for example, projected d
     \item Return the validated action.
 \end{itemize}
 
-For explicit auditability, Section 4.3 shield execution is summarized below:
+For explicit auditability, shield execution is summarized below:
 \begin{enumerate}
     \item Input $(s_t, a_t, a_{t-1})$.
     \item Set $a\leftarrow\mathrm{clip}(a_t,a_{\min},a_{\max})$.
@@ -47,7 +47,7 @@ For explicit auditability, Section 4.3 shield execution is summarized below:
     \item Otherwise, return $\mathrm{emergency\_safe\_action}(s_t)$.
 \end{enumerate}
 
-\subsection{Quantum Uncertainty Gate}
+\subsection{Quantum-Inspired Uncertainty Gate}
 
 The policy front-end is a 6-qubit variational circuit with angle embedding, entangling layers, data re-uploading, and Pauli-$Z$ measurements for mean/scale signals. Uncertainty is estimated by parameter perturbation:
 \[
@@ -74,13 +74,13 @@ In head-to-head tests, this choice gave a practical balance: quantum parameter-p
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.88\linewidth]{figures/robust_policy_flow.pdf}
-\caption{Quantum-gated fallback and shielded action execution.}
+\caption{Quantum-inspired uncertainty-gated fallback and shielded action execution.}
 \label{fig:robust-flow}
 \end{figure}
 
-\subsection{Why the VQC Compresses Well Here}
+\subsection{Why the Compact Estimator Compresses Well Here}
 
-The 6-qubit VQC is classically simulated in this study, and the design priority is parameter efficiency rather than raw throughput. Governance states couple a few dominant factors (delay, congestion, adversarial pressure) with strong interaction effects. Entangling layers provide multiplicative feature interactions in a compact parameterization, and data re-uploading lets the same qubits express higher-order nonlinear responses over time. In this setting, that combination approximates the required control surface with far fewer trainable weights than a dense MLP. Empirically, compression is most effective when paired with uncertainty gating and shielding, which stabilize behavior during regime shifts.
+The 6-qubit VQC-style module is classically simulated in this study, and the design priority is parameter efficiency rather than raw throughput. Governance states couple a few dominant factors (delay, congestion, adversarial pressure) with strong interaction effects. Entangling layers provide multiplicative feature interactions in a compact parameterization, and data re-uploading lets the same qubits express higher-order nonlinear responses over time. In this setting, that combination approximates the required control surface with far fewer trainable weights than a dense MLP. Empirically, compression is most effective when paired with uncertainty gating and shielding, which stabilize behavior during regime shifts.
 
 \subsection{Adversarial and Ablation Design}
 

@@ -9,8 +9,8 @@ We evaluate in two tiers:
 For publication-facing comparisons, we use fixed seed sets to preserve paired comparability under stochastic dynamics.
 Specifically, 16 paired seeds are used for long-horizon PPO-family and component-ablation suites where each run is computationally heavier, 50 seeds are used for official OmniSafe constrained-baseline runs, and 30 seeds are used for uncertainty-comparison and parameter-efficiency suites to reduce variance in head-to-head reporting.
 
-\paragraph{Constrained baseline fidelity statement.}
-The constrained baselines reported in the main table are official OmniSafe implementations (CPO, P3O, PPOLag, SACLag, FOCOPS) executed through OmniSafe-compatible adapters for both environments.
+\paragraph{Governance comparison method set.}
+The governance comparison table reports six controllers under a matched protocol in both environments: Random, Heuristic, CPO-style, P3O-style, PPO-Lagrangian-style, and Robust QGate+Shield.
 
 \paragraph{Environment realism extension.}
 Both environments now support optional trace-driven dynamics via CSV inputs (for demand, volatility, MEV pressure, and oracle-noise regimes). This allows replaying historical blockchain or DeFi traces instead of relying only on synthetic stochastic drift.
@@ -26,7 +26,7 @@ We report:
     \item per-decision latency and forward-FLOPs proxy.
 \end{itemize}
 
-Fallback activation is measured as the fraction of states where uncertainty exceeds threshold and the policy is routed to the deterministic controller before shield validation.
+Fallback activation is measured as the fraction of states where executed control is routed to the deterministic controller, either by uncertainty-gate routing or by shield-triggered heuristic substitution after a failed hard-safety check.
 
 \paragraph{Hypothesis Testing.}
 We use permutation tests and effect sizes for key pairwise comparisons in the base PPO-family analyses, and direct metric comparisons for constrained baseline suites (final return, final cost, and final episode length).
@@ -36,7 +36,7 @@ Bootstrap resampling (95\% confidence) is used for interval reporting where appl
 \paragraph{High-rigor constrained-baseline protocol.}
 To reduce uncertainty in baseline ranking, the constrained-baseline protocol uses 50 seeds with fixed environment settings and pre-declared metrics (reward, safety cost, and safety violations in hard regimes).
 
-\paragraph{Fair-capacity quantum efficiency protocol.}
+\paragraph{Fair-capacity quantum-inspired efficiency protocol.}
 To separate architecture effects from raw parameter count, the efficiency protocol includes matched-capacity controls (for example, VQC-28 vs MLP-28) in addition to larger classical baselines. We report both absolute performance and parameter-normalized performance in that protocol.
 
 \paragraph{Primary standard-benchmark protocol.}

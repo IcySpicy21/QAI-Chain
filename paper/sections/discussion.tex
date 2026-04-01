@@ -2,13 +2,29 @@
 
 The results are easiest to read as a trade-off story rather than a single winning score.
 
+The strongest empirical message is architectural, not leaderboard-based: uncertainty-gated execution with deterministic shielding changes failure behavior under shift. That mechanism-level change is the paper's central scientific value.
+
 The first point is external validity: the primary standard-benchmark runs (SafetyPointGoal1-v0 and SafetyHalfCheetahVelocity-v1) show stable constrained-learning behavior under a fixed 30-seed protocol. These tasks are where we should judge portability. The governance environments then serve as stress tests that expose mechanism behavior under harder, less stationary shifts.
 
-The second point is the negative result. In the main ablation table, random reward is less negative than full-system reward in one workload. We do not hide or smooth that result. It indicates reward misspecification pressure: a random controller can occasionally score better on a stylized reward while ignoring control intent. The gated controller often chooses conservative actions that protect tracking and constraints at the expense of raw return. This is a limitation of the reward design and a reminder that reward alone is an unsafe deployment metric.
+The second point is the negative result. In the main ablation table, random reward is less negative than full-system reward in one workload. We do not hide or smooth that result. It indicates reward misspecification pressure: a random controller can occasionally score better on a stylized reward while ignoring control intent. The gated controller often chooses conservative actions that protect tracking and constraints at the expense of raw return. This is both a limitation of reward design and a concrete argument for evaluating constrained control with multi-metric criteria rather than reward alone.
 
 The third point is where the method helps in practice. As switching complexity increases, uncertainty-gated routing reduces brittle policy behavior and improves failure-targeting precision without increasing model size. The efficiency claim is therefore practical, not cosmetic: a compact uncertainty head can preserve safety-oriented behavior while keeping deployment budgets realistic.
 
+Positioning-wise, the method should be read as a systems-and-control design for high-shift environments. It does not replace modern safe RL objective design; it complements it by adding a deployable decision-time safety layer that can sit on top of existing policy learners.
+
 Official OmniSafe constrained baselines reinforce this interpretation. Return rankings move across methods and budgets, while cost differences can remain relatively tight. That pattern is exactly what we expect in constrained RL: safety and reward should be interpreted as a frontier, not a leaderboard.
+
+\subsection{Why Uncertainty-Gated Control Works}
+
+The mechanism can be understood as a three-part decomposition.
+
+First, uncertainty gating improves branch selection under shift. When epistemic uncertainty rises, routing to a deterministic heuristic avoids committing to poorly calibrated policy logits in exactly the regime where policy-only execution is most brittle.
+
+Second, shielding regularizes action execution even when branch selection is imperfect. Bounded actions and bounded action-rate change constrain tail-risk trajectories that otherwise dominate safety incidents in high-switch regimes.
+
+Third, risk-shaped training complements decision-time controls. Penalizing short-window reward variance reduces incentive to exploit transient reward spikes that are not aligned with stable control intent.
+
+This decomposition clarifies why gains are most visible under disturbance and less pronounced in easier stationary regimes: the architecture contributes primarily through failure-mode control, not through unconditional reward amplification.
 
 \subsection{Failure Cases}
 

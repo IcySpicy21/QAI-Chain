@@ -6,32 +6,34 @@
 \begin{table}[htbp]
 \centering
 \input{tables/component_necessity_ablation}
-\caption{Seven-configuration component ablation with side-by-side metrics (means from generated artifacts).}
+\caption{Seven-configuration component ablation in the custom scaled-governance stress workload (artifact means). Reward values in this table are workload-specific and not directly comparable to constrained-baseline or efficiency-suite reward scales.}
 \label{tab:component-necessity}
 \end{table}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\linewidth]{figures/money_plot_ablation.pdf}
-\caption{Seven-way ablation money plot: reward, safety violations, target MAE, and fallback activation.}
+\caption{Four-configuration ablation subset plot (Full, Classical PPO, No Q-Gate, No Shield): reward, safety violations, target MAE, and fallback activation.}
 \label{fig:money-plot}
 \end{figure}
 
+Figure~\ref{fig:money-plot} intentionally visualizes a compact subset for readability. The full seven-configuration matrix, including No Fallback, Heuristic, and Random (which contains the negative-result comparison), is reported in Table~\ref{tab:component-necessity}.
+
 Table~\ref{tab:component-necessity} makes the component trade-offs explicit. Relative to full-system reward (-1264.90), removing the quantum gate reduces reward to -1294.06 and increases fallback rate from 0.000 to 0.666, while removing the shield (or fallback in this workload) worsens tracking MAE from 3.372 to 4.063. Classical PPO also underperforms the full system on reward (-1284.05 vs -1264.90) and has higher latency in artifact-level diagnostics.
 
-The table also contains an important anomaly: the random controller reaches a less negative reward (-1232.33) than the full system in this stylized workload. We treat this as a negative result, not a bookkeeping artifact. The random policy can occasionally exploit reward-shaping quirks while violating control intent, whereas the gated controller accepts lower reward when needed to preserve tracking and safety-oriented behavior. This is exactly why we do not claim universal reward dominance.
+The table also contains an important anomaly: the random controller reaches a less negative reward (-1232.33) than the full system in this stylized workload. We treat this as a negative result, not a bookkeeping artifact. The interpretation is operational: the random policy can exploit reward-shaping quirks without reliably satisfying control intent, while the gated controller often trades raw return for lower-risk behavior under uncertainty. This is why the paper reports safety- and tracking-oriented metrics alongside reward instead of treating reward rank as a standalone success criterion.
 
-\subsection{Constrained Baseline Comparison}
+\subsection{Governance Controller Comparison}
 
 \begin{table}[htbp]
 \centering
 \input{tables/constrained_baseline_comparison}
-\caption{Official OmniSafe constrained baselines (CPO, P3O, PPOLag, SACLag, FOCOPS) across scaled and DeFi environments (50 seeds). $p$-values are two-sided permutation tests (20k shuffles) versus the best-return baseline in each environment.}
+\caption{Governance controller comparison under the 50-seed matched protocol across scaled and DeFi environments: Random, Heuristic, CPO-style, P3O-style, PPO-Lagrangian-style, and Robust QGate+Shield. Reward values in this table are protocol-specific and not numerically comparable to ablation or efficiency-suite reward scales.}
 \label{tab:constrained-baselines}
 \end{table}
 
-Using official OmniSafe implementations with 50 seeds and 4000 training steps per run, FOCOPS attains the strongest mean return in both environments under this trajectory budget. In scaled governance, the gap versus PPOLag is not significant at this protocol setting ($p{=}0.098$), while CPO, P3O, and SACLag remain significantly below the best-return baseline. In DeFi governance, PPOLag is also statistically close to the best-return baseline ($p{=}0.378$), with CPO, P3O, and SACLag significantly below. Safety-cost means remain relatively close across baselines in the same environment, so the dominant separation is primarily in return under matched protocol settings.
-This reinforces the paper's primary claim as parameter efficiency with comparable safety behavior rather than return superiority: in the efficiency suite, the compact architecture achieves similar safety outcomes with a 166.89$\times$ smaller policy parameterization.
+Under the matched 50-seed protocol, no single controller dominates both environments on all metrics. In scaled governance, heuristic and robust gated control remain competitive with CPO/P3O/PPO-Lagrangian-style variants on reward while keeping similar violation levels. In DeFi governance, P3O-style has the strongest mean reward in this table, while the robust gated controller attains the lowest target MAE, highlighting the expected reward-tracking trade-off.
+This reinforces the paper's primary claim as parameter efficiency with comparable safety behavior rather than return superiority: in a separate larger-model efficiency suite, the compact architecture achieves similar safety outcomes with a 166.89$\times$ smaller policy parameterization.
 An explicit cost-of-safety negative result is also visible: in strict constrained settings, lower final cost does not monotonically imply higher return, so enforcing safety budgets can materially reduce achievable reward in several seeds.
 
 \subsection{Primary Standard Benchmark Evaluation}
@@ -39,7 +41,7 @@ An explicit cost-of-safety negative result is also visible: in strict constraine
 \begin{table}[htbp]
 \centering
 \input{tables/standard_transfer_status}
-\caption{Completed 30-seed constrained standard-benchmark runs on the current host (SafetyPointGoal1-v0 and SafetyHalfCheetahVelocity-v1).}
+\caption{Completed 30-seed constrained benchmark runs on this host (SafetyPointGoal1-v0, SafetyHalfCheetahVelocity-v1).}
 \label{tab:standard-transfer-status}
 \end{table}
 
@@ -58,11 +60,11 @@ SafetyHalfCheetahVelocity-v1 reports finite and stable metrics across all three 
 \label{fig:stress-top-tier}
 \end{figure}
 
-The crossover region in Figure~\ref{fig:stress-top-tier} identifies where robust gating overtakes naive policy behavior as disturbance intensity rises.
+In this stress sweep, the robust controller overtakes classical PPO in the higher-intensity regime (approximately $C\ge 1.4$ in the associated complexity summary), while deterministic heuristic control remains competitive across much of the range. The key pattern is regime-dependent ranking, not a single globally dominant method: deterministic heuristics can remain strong in easier regimes, whereas uncertainty-gated control becomes more valuable as disturbance structure and switching pressure increase.
 
 \subsection{Real-Trace Replay}
 
-We replay environment dynamics using a real blockchain signal: historical Ethereum daily gas-price history from Etherscan, transformed into trace-driven regime features (intensity, demand drift, volatility, and MEV proxies). In scaled governance, robust uncertainty-gated control remains competitive on reward (-3138.95 vs -3108.62 heuristic and -3265.31 PPO-Lagrangian) and keeps lower latency than PPO-Lagrangian (1.103 vs 1.253). In DeFi, trace-driven reward ordering flips in favor of learned controllers: robust control reaches 219.79, PPO-Lagrangian reaches 206.38, and heuristic control reaches 177.19 under the same historical trace schedule.
+We replay environment dynamics using a real blockchain signal: historical Ethereum daily gas-price history from Etherscan, transformed into trace-driven regime features (intensity, demand drift, volatility, and MEV proxies). Reported values in this subsection are from a single fixed historical-trace replay per controller under a deterministic schedule (seed count $n{=}1$ for this trace report), so these numbers should be interpreted as case-study evidence rather than variance-estimated statistics. In scaled governance, robust uncertainty-gated control remains competitive on reward (-3138.95 vs -3108.62 heuristic and -3265.31 PPO-Lagrangian) and keeps lower latency than PPO-Lagrangian (1.103 vs 1.253). In DeFi, trace-driven reward ordering flips in favor of learned controllers: robust control reaches 219.79, PPO-Lagrangian reaches 206.38, and heuristic control reaches 177.19 under the same historical trace schedule.
 
 \begin{table}[htbp]
 \centering
@@ -80,7 +82,7 @@ We replay environment dynamics using a real blockchain signal: historical Ethere
 \label{tab:uncertainty-head-to-head}
 \end{table}
 
-Using matched 90th-percentile trigger rates (10\% for every method), quantum parameter-perturbation uncertainty improves precision over classical expensive estimators at the same trigger budget (0.942 vs 0.833 for MC-dropout and 0.814 for ensemble), while preserving similar recall (0.106 vs 0.094 and 0.092). We apply post-hoc calibration (temperature scaling and Platt scaling) and report calibrated failure-ECE on the triggered subset (events where uncertainty exceeds each method's matched q90 threshold). Calibrated failure-ECE is below 0.1 for all methods in this protocol (values shown to four decimals in Table~\ref{tab:uncertainty-head-to-head}). In the hardest regime (intensity 1.0), quantum perturbation reaches 0.964 precision at 0.101 recall, while MC-dropout reaches 0.743 precision at 0.100 recall.
+Using matched 90th-percentile trigger rates (10\% for every method), quantum-inspired parameter-perturbation uncertainty improves precision over classical expensive estimators at the same trigger budget (0.942 vs 0.833 for MC-dropout and 0.814 for ensemble), while preserving similar recall (0.106 vs 0.094 and 0.092). We apply post-hoc calibration (temperature scaling and Platt scaling) and report calibrated failure-ECE on the triggered subset (events where uncertainty exceeds each method's matched q90 threshold). Calibrated failure-ECE is below 0.1 for all methods in this protocol (values shown to four decimals in Table~\ref{tab:uncertainty-head-to-head}). In the hardest regime (intensity 1.0), quantum-inspired perturbation reaches 0.964 precision at 0.101 recall, while MC-dropout reaches 0.743 precision at 0.100 recall.
 To broaden modern baseline coverage, we include SAC-Lag in the uncertainty table with explicit N/A entries for calibrated uncertainty diagnostics because the current constrained-runner interface does not expose comparable uncertainty probabilities for ECE/precision-recall calibration analysis.
 
 \begin{figure}[H]
@@ -116,27 +118,28 @@ VQC policies operate in a lower-parameter regime while staying on the competitiv
 
 This parameter-efficiency result reflects compact quantum-inspired architecture under classical simulation.
 
-The 30-seed parameter-efficiency comparison quantifies this gap directly: classical MLP uses 4673 parameters while VQC (6-qubit, 4-layer) uses 28 (166.89$\times$ fewer). Despite this compression, VQC improves mean reward (-2700.23 vs -2802.85) with lower variance (34.78 vs 123.20) at effectively identical safety violations (115.50 vs 115.50).
-Expressed as relative performance context, the VQC reward is 3.66\% better than the classical MLP baseline while using 0.60\% of the parameters.
+The larger-model efficiency comparison (the protocol used for the 166.89$\times$ claim) quantifies this gap directly: classical MLP uses 4673 parameters while VQC (6-qubit, 4-layer) uses 28 (166.89$\times$ fewer). In that protocol, VQC improves mean reward (-2700.23 vs -2802.85) with lower variance (34.78 vs 123.20) at effectively identical safety violations (115.50 vs 115.50).
+Expressed as relative context for that larger-model protocol, the VQC reward is 3.66\% better than the classical MLP baseline while using 0.60\% of the parameters.
 
 \subsection{Matched-Capacity Efficiency Control}
 
 \begin{table}[htbp]
 \centering
 \input{tables/parameter_efficiency_matched}
-\caption{Matched-capacity efficiency control on scaled governance (VQC-28 vs MLP-28, plus larger MLP reference).}
+\caption{Matched-capacity efficiency control on scaled governance (VQC-28 vs MLP-28, plus larger MLP reference). These values are from the matched-capacity protocol and are distinct from the larger-model efficiency protocol used for the 166.89$\times$ compression claim.}
 \label{tab:matched-capacity}
 \end{table}
 
 The matched-capacity control addresses parameter-count fairness directly. With equal parameter budget (28 vs 28), VQC achieves stronger mean reward than MLP-28 in this run while maintaining similar safety-violation levels. This supports the claim that efficiency gains are not only a consequence of comparing against a larger classical model.
 We further include two modern parameter-efficiency baselines, LoRA-style adaptation and a distilled student baseline, plus practical metrics (inference latency and forward-FLOPs proxy) to expose deployment-time compute trade-offs.
+The deployment trade-off is explicit in Table~\ref{tab:matched-capacity}: VQC inference latency is substantially higher than MLP-28 in this implementation (9.3438 ms vs 0.0837 ms). This is not ignored by the method; it defines the target regime. The intended use case is footprint-constrained or uncertainty-sensitive control loops where parameter budget and uncertainty quality matter more than raw per-step latency. For strict low-latency settings, compact classical baselines remain the preferred deployment option.
 
 \subsection{Architecture View}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\linewidth]{figures/architecture_loop_top_tier.pdf}
-\caption{End-to-end governance loop: policy proposal, quantum uncertainty gate, shield enforcement, and on-chain commit.}
+\caption{End-to-end governance loop: policy proposal, quantum-inspired uncertainty gate, shield enforcement, and on-chain commit.}
 \label{fig:arch-top-tier}
 \end{figure}
 

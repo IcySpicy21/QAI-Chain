@@ -13,7 +13,7 @@ Action outputs are bounded and then validated by a safety shield before executio
 
 \subsection{Policy Family}
 
-We evaluate random, heuristic, PPO-family, and robust gated controllers. PPO uses clipped updates \citep{schulman2017ppo}. The robust branch adds risk shaping:
+We evaluate random, heuristic, PPO-family, and robust gated controllers. PPO uses clipped updates \cite{schulman2017ppo}. The robust branch adds risk shaping:
 \[
 \tilde r_t = r_t - \lambda_{\mathrm{risk}}\,\mathrm{Var}(r_{t-k:t}).
 \]
@@ -104,4 +104,4 @@ r_t^{\text{adv}} ={}& \alpha\,\text{throughput}_t - \beta\,\text{delay}_t - \gam
 
 \subsection{Evaluation}
 
-Primary metrics are reward, safety violations, target MAE, fallback rate, and latency proxy. For base PPO-family comparisons we report bootstrap intervals, permutation tests, and Cohen's $d$ \citep{efron1994introduction,good2005permutation}.
+Primary metrics are reward, safety violations, target MAE, fallback rate, and latency proxy. For base PPO-family comparisons we report bootstrap intervals, permutation tests, and Cohen's $d$ \cite{efron1994introduction,good2005permutation}.

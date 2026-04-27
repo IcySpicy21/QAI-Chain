@@ -28,7 +28,7 @@ with horizon $T=25$ and per-run episodic aggregation over 35 or 60 episodes depe
 
 \subsection{Policy Optimization Objective}
 
-The PPO branch uses a clipped surrogate objective \citep{schulman2017ppo}:
+The PPO branch uses a clipped surrogate objective \cite{schulman2017ppo}:
 \begin{equation}
 \mathcal{L}^{\text{clip}}(\theta) = \mathbb{E}_t\Big[\min\big(r_t(\theta)\hat{A}_t, \operatorname{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t\big)\Big],
 \end{equation}
@@ -48,7 +48,7 @@ We compare PPO with and without advantage normalization:
 \begin{equation}
 \hat{A}_t \leftarrow \frac{\hat{A}_t - \mu_A}{\sigma_A + 10^{-8}}.
 \end{equation}
-Normalization can improve conditioning in mini-batch gradient steps by reducing scale variance across updates \citep{sutton2018reinforcement}. In our environment, removing it can increase average reward in some seeds, but with larger instability under policy drift.
+Normalization can improve conditioning in mini-batch gradient steps by reducing scale variance across updates \cite{sutton2018reinforcement}. In our environment, removing it can increase average reward in some seeds, but with larger instability under policy drift.
 
 \subsection{Complexity Notes}
 
@@ -56,4 +56,4 @@ For a policy/value MLP with width $h$, input dimension $d$, and scalar action he
 
 \subsection{Design Principle: Honest Baselines First}
 
-We keep strong simple baselines. In constrained control surfaces, proportional heuristics can dominate RL policies when target structure is directly exposed. Reporting this outcome directly is necessary for scientific validity and empirical comparison \citep{pineau2021improving}.
+We keep strong simple baselines. In constrained control surfaces, proportional heuristics can dominate RL policies when target structure is directly exposed. Reporting this outcome directly is necessary for scientific validity and empirical comparison \cite{pineau2021improving}.

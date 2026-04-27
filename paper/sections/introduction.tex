@@ -1,23 +1,23 @@
 \section{Introduction}
 
-Two themes motivate QAI-Chain. First, controllers deployed in governance-like loops fail under shift in ways that mean-return plots conceal: the policy may keep a reasonable average reward while producing brittle, high-variance actions when telemetry is adversarial or the regime changes mid-episode. Second, in those regimes it is common to keep a deterministic rule-based controller in the loop anyway; the engineering question is how to integrate learning with that reality cleanly.
+Governance-style loops are awkward for off-the-shelf RL. Mean return can look fine while the policy does something brittle whenever telemetry gets adversarial or the regime flips mid-episode. At the same time, engineers rarely rip out every hand-written rule; the interesting design problem is how to bolt learning onto deterministic safeguards without pretending the safeguards do not exist.
 
-We study a concrete pattern: \emph{uncertainty-gated execution with deterministic shielding}. PPO proposes an action, an uncertainty estimate decides whether to execute it or fall back to a deterministic heuristic, and a shield enforces hard bounds and rate limits before the environment sees the control. The ``quantum-inspired'' element is used as an efficiency mechanism: a compact, classically simulated VQC-style head provides a nonlinear uncertainty signal at low parameter count. In a hard regime we observe higher fallback precision at matched trigger rate (intensity 1.0: 0.964 vs 0.743 for MC-dropout).
+That is the setting we had in mind for QAI-Chain. PPO still proposes an action. A cheap uncertainty read decides whether we trust that action or hand off to a deterministic heuristic. A shield---again deterministic---clips rates and bounds before anything executes. The ``quantum-inspired'' label is only about parameter count: we use a compact VQC-style readout, simulated classically, to get a nonlinear uncertainty signal without dragging a full ensemble into the loop. In the hardest regime we looked at, that readout gave higher fallback precision at the same trigger rate than MC-dropout (0.964 vs 0.743 at intensity~1.0).
 
-Scope is intentionally narrow. The claim is not a quantum advantage statement and not a promise of universal reward dominance. The claim is architectural: under rapid switching, routing by calibrated uncertainty plus a deterministic shield yields a more stable safety profile than policy-only execution, and can be implemented with a compact estimator instead of a large ensemble.
+We are not selling quantum speedups or a new universal RL objective. The narrow claim is that, under fast switching, calibrated routing plus a hard shield changes the failure shape relative to policy-only execution, and you can get there without a huge uncertainty module.
 
-Empirically we anchor external validity on standard constrained benchmarks (SafetyPointGoal1-v0 and SafetyHalfCheetahVelocity-v1) under a fixed 30-seed protocol, then treat governance simulations as stress tests with matched 50-seed comparisons. We also keep ``honest baselines'' in the loop: deterministic heuristics are not straw men, and in easier regimes they remain strong.
+The empirical story is split on purpose. SafetyPointGoal1-v0 and SafetyHalfCheetahVelocity-v1 with a fixed thirty-seed protocol are the sanity check that the training stack behaves on standard constrained tasks. The governance simulators are deliberately meaner: same matched fifty-seed protocol for the controller comparison table, plus stress sweeps. Heuristic controllers stay in the plot on purpose---they are not straw opponents, and in mild regimes they still win plenty of cells.
 
-Implementation-wise, we change as little as possible relative to PPO: (i) variance-aware reward shaping during training, and (ii) a decision-time routing rule controlled by a threshold $\tau$ and a risk weight $\lambda_{\mathrm{risk}}$. Across complexity levels we keep the model class and environment fixed and retune only these few scalars, so comparisons track the effect of the safety layer rather than a shifting architecture.
+Training changes relative to vanilla PPO are small: we add variance-aware reward shaping and a routing rule with threshold $\tau$ and risk weight $\lambda_{\mathrm{risk}}$. When we sweep complexity we keep the model class and simulator fixed and only retune those scalars so we are not confounding ``more safety glue'' with ``different backbone network.''
 
-On-chain audit commitments appear as an optional deployment layer for provenance and incident review; they are orthogonal to the core safe-control mechanism evaluated in this manuscript.
+Blockchain commitments show up only as an optional audit trail after execution. They matter for provenance if several parties review actions; they do not change the control math we evaluate in the main experiments.
 
 \paragraph{Contributions.}
-The paper makes the following contributions:
+What we think is new enough to write down:
 \begin{itemize}
-    \item a decision-time safe-control architecture that combines uncertainty-gated fallback with deterministic shielding,
-    \item a parameter-efficient uncertainty-estimation module (compact architecture) that preserves safety behavior under non-stationary disturbances,
-    \item and a high-rigor evaluation protocol centered on completed 30-seed standard constrained-benchmark runs (SafetyPointGoal1-v0 and SafetyHalfCheetahVelocity-v1), with a matched 50-seed governance controller-comparison suite and governance stress tests as supporting evidence.
+    \item a decision-time stack that couples uncertainty-triggered fallback with deterministic shielding,
+    \item a low-footprint uncertainty head (the VQC-style block) that keeps behavior from falling apart when disturbances kick in,
+    \item and an evaluation package that includes finished thirty-seed runs on the two Safety Gym tasks above, plus the fifty-seed governance controller suite and the stress tests behind the appendix figures.
 \end{itemize}
 
 \begin{table}[htbp]
@@ -28,14 +28,14 @@ The paper makes the following contributions:
 \end{table}
 
 \paragraph{Scope.}
-The empirical claim is specific and testable: uncertainty-gated control with compact architecture achieves comparable safety behavior at materially lower parameter budget under non-stationary governance dynamics, and this can be measured with fixed-seed paired comparisons \cite{dror2018hitchhikers,pineau2021improving,wilson2017good}.
+The falsifiable bit is narrow: with fixed seeds and paired comparisons, gated control plus the compact head matches the safety-relevant behavior of heavier setups at much smaller parameter budget under the non-stationary governance dynamics we actually simulated \cite{dror2018hitchhikers,pineau2021improving,wilson2017good}.
 
 \section{Related Perspectives}
 
-Blockchain and ML integration work often focuses on transaction analytics, mechanism optimization, or fraud detection in mostly stationary settings. Governance control with adversarial perturbations has received less systematic, reproducible treatment. Classical consensus foundations remain essential \cite{nakamoto2008bitcoin}, and PPO remains a practical baseline for continuous-control policy learning \cite{schulman2017ppo}, but both need stress-tested evaluation when used in operational control loops.
+Most blockchain--ML papers we see stay in the comfortable zone: fraud scoring, mempool analytics, mechanism tuning, all with fairly stationary statistics. Adversarial governance telemetry gets less of that treatment, and reproducible benchmarks are rarer than slide decks. Nakamoto-style consensus is still the floor for why anyone trusts a shared log \cite{nakamoto2008bitcoin}; PPO is still the default hammer for continuous control \cite{schulman2017ppo}. Neither removes the need to beat on the loop before you ship it.
 
-Safe RL literature offers several tools with different assumptions: CVaR objectives \cite{chow2015cvar}, robust MDP formulations \cite{iyengar2005robust}, and constrained policy optimization \cite{achiam2017cpo}. Recent practice also emphasizes distribution-shift robustness, risk-sensitive policy updates, and uncertainty-aware action filtering. The approach here keeps PPO as the optimizer and adds uncertainty-aware routing at action time with risk shaping during updates. We evaluate this controller pattern against strong heuristic and constrained baselines under the same disturbance model, and we explicitly treat this paper as a systems-and-control contribution rather than a new policy-optimization objective.
+Safe RL has a crowded toolbox---CVaR-style objectives \cite{chow2015cvar}, robust DP views \cite{iyengar2005robust}, constrained policy optimization \cite{achiam2017cpo}, plus a long tail of distribution-shift hacks. We stayed conservative on the optimizer (PPO) and spent effort on what happens \emph{after} the policy logits are sampled: routing, shaping, shielding. Everything is evaluated under one disturbance model so the comparisons are not apples-to-oranges. We treat the paper as a systems contribution: wiring and evaluation, not a new surrogate loss.
 
-Relative to modern safe-RL directions (risk-sensitive updates, uncertainty-aware filtering, and robust constrained control), this work contributes primarily at the control-architecture layer: it specifies how to combine branch-level uncertainty routing with deterministic post-check execution in a reproducible deployment pipeline. Expanding direct head-to-head comparison against additional recent baselines is an explicit next step, not an omitted assumption.
+Compared with the newer risk-sensitive and uncertainty-heavy lines, our delta is mostly architectural---how branch-level routing and a post-check shield sit in a reproducible pipeline. A wider baseline net (2023--2025 methods) is honest future work; we say that up front instead of pretending the table is exhaustive.
 
-Reproducibility details are provided in dedicated checklist material, while the main text focuses on algorithmic behavior and safety-relevant outcomes.
+Reproducibility lives in the checklist-style appendix material; the main text stays focused on behavior.

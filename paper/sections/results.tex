@@ -17,11 +17,11 @@
 \label{fig:money-plot}
 \end{figure}
 
-Figure~\ref{fig:money-plot} intentionally visualizes a compact subset for readability. The full seven-configuration matrix, including No Fallback, Heuristic, and Random (which contains the negative-result comparison), is reported in Table~\ref{tab:component-necessity}.
+Figure~\ref{fig:money-plot} only plots four lines so the page stays readable. Table~\ref{tab:component-necessity} carries the full seven rows, including No Fallback, Heuristic, and Random---that last row is where the negative result lives.
 
-Table~\ref{tab:component-necessity} makes the component trade-offs explicit. Relative to full-system reward (-1264.90), removing the quantum gate reduces reward to -1294.06 and increases fallback rate from 0.000 to 0.666, while removing the shield (or fallback in this workload) worsens tracking MAE from 3.372 to 4.063. Classical PPO also underperforms the full system on reward (-1284.05 vs -1264.90) and has higher latency in artifact-level diagnostics.
+The ablation table is blunt arithmetic. Dropping the quantum gate drags reward from $-1264.90$ to $-1294.06$ and pushes fallback from $0.000$ to $0.666$. Dropping the shield (or fallback in this workload) blows tracking MAE from $3.372$ to $4.063$. Classical PPO sits at $-1284.05$ on reward versus $-1264.90$ for the full stack and shows higher latency in the artifact logs.
 
-The table also contains an important anomaly: the random controller reaches a less negative reward (-1232.33) than the full system in this stylized workload. We treat this as a negative result, not a bookkeeping artifact. The interpretation is operational: the random policy can exploit reward-shaping quirks without reliably satisfying control intent, while the gated controller often trades raw return for lower-risk behavior under uncertainty. This is why the paper reports safety- and tracking-oriented metrics alongside reward instead of treating reward rank as a standalone success criterion.
+Random is the awkward line: $-1232.33$ reward, which beats the full system on that scalar. We are not hiding it as a typo. Random can surf reward-shaping quirks without honoring control intent; the gated stack often buys safety and tracking by giving away return. That is exactly why we print violations and MAE next to reward instead of crowning a single leaderboard winner.
 
 \subsection{Governance Controller Comparison}
 
@@ -32,9 +32,9 @@ The table also contains an important anomaly: the random controller reaches a le
 \label{tab:constrained-baselines}
 \end{table}
 
-Under the matched 50-seed protocol, no single controller dominates both environments on all metrics. In scaled governance, heuristic and robust gated control remain competitive with CPO/P3O/PPO-Lagrangian-style variants on reward while keeping similar violation levels. In DeFi governance, P3O-style has the strongest mean reward in this table, while the robust gated controller attains the lowest target MAE, highlighting the expected reward-tracking trade-off.
-This reinforces the paper's primary claim as parameter efficiency with comparable safety behavior rather than return superiority: in a separate larger-model efficiency suite, the compact architecture achieves similar safety outcomes with a 166.89$\times$ smaller policy parameterization.
-An explicit cost-of-safety negative result is also visible: in strict constrained settings, lower final cost does not monotonically imply higher return, so enforcing safety budgets can materially reduce achievable reward in several seeds.
+Fifty seeds, matched protocol, six controllers---nobody sweeps every column in both environments. Scaled governance still shows heuristic and robust gated controllers trading blows with the CPO/P3O/Lagrangian-style entries on reward without blowing up violations. In the DeFi table P3O-style wins mean reward, while the robust gated row owns the lowest target MAE, i.e., the usual reward--tracking tug of war.
+
+The headline we want from that split is not ``we topped P3O everywhere.'' It is parameter efficiency with similar safety posture: the separate efficiency suite puts similar safety numbers next to a $166.89\times$ smaller policy parameterization. You can also read the constrained block as a cautionary tale---lower final safety cost does not automatically come with higher return once budgets bite, and several seeds move backward on return when safety is enforced hard.
 
 \subsection{Primary Standard Benchmark Evaluation}
 

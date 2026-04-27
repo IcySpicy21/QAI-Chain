@@ -67,9 +67,9 @@ a_t^{\mathrm{policy}}, & u_q(x_t)\le\tau_q.
 
 \subsection{Engineering Trade-offs in Uncertainty Design}
 
-The uncertainty estimator was chosen with deployment latency in mind, not only offline accuracy. Deep ensembles improve diversity but require maintaining and serving multiple full policy copies per decision step. In contrast, parameter perturbation reuses one compact model and injects small weight noise at inference, which keeps implementation complexity and memory footprint lower in our control loop.
+Latency mattered when we picked the uncertainty block, not only whether the score looked pretty offline. Full ensembles diversify but you pay with memory and serving: every step needs several forward passes through separate copies. Parameter perturbation keeps one small network and jitters weights at inference; that is easier to host next to a real controller.
 
-In head-to-head tests, this choice gave a practical balance: quantum parameter-perturbation uncertainty achieved higher precision at the same trigger budget than MC-dropout and ensemble baselines, while preserving comparable recall. We therefore prioritized estimator compactness plus decision quality under fixed trigger-rate constraints over maximizing any single uncertainty score in isolation.
+Head-to-head, the perturbation readout hit higher precision at the same trigger budget than MC-dropout and the ensemble baselines we tried, without giving up much recall. We therefore tuned for ``good enough routing under a fixed trigger rate'' instead of chasing a single scalar uncertainty metric.
 
 \begin{figure}[H]
 \centering
@@ -80,7 +80,7 @@ In head-to-head tests, this choice gave a practical balance: quantum parameter-p
 
 \subsection{Why the Compact Estimator Compresses Well Here}
 
-The 6-qubit VQC-style module is classically simulated in this study, and the design priority is parameter efficiency rather than raw throughput. Governance states couple a few dominant factors (delay, congestion, adversarial pressure) with strong interaction effects. Entangling layers provide multiplicative feature interactions in a compact parameterization, and data re-uploading lets the same qubits express higher-order nonlinear responses over time. In this setting, that combination approximates the required control surface with far fewer trainable weights than a dense MLP. Empirically, compression is most effective when paired with uncertainty gating and shielding, which stabilize behavior during regime shifts.
+We simulate the six-qubit VQC-style block classically; the win we cared about was parameter count, not quantum throughput. Governance states in our build mix a handful of heavy drivers---delay, congestion, attack pressure---with ugly cross-terms. Entanglement buys multiplicative mixing cheaply, and re-uploading lets the same wires react nonlinearly across time. That recipe tracks the control surface we needed with far fewer weights than a fat MLP. In practice the compression only looked good once gating and shielding were on, because otherwise the head saw regimes it was never trained to stabilize.
 
 \subsection{Adversarial and Ablation Design}
 
@@ -104,4 +104,4 @@ r_t^{\text{adv}} ={}& \alpha\,\text{throughput}_t - \beta\,\text{delay}_t - \gam
 
 \subsection{Evaluation}
 
-Primary metrics are reward, safety violations, target MAE, fallback rate, and latency proxy. For base PPO-family comparisons we report bootstrap intervals, permutation tests, and Cohen's $d$ \cite{efron1994introduction,good2005permutation}.
+We track the obvious scalars---reward, violations, target MAE, how often fallback fires, and a latency proxy. Whenever we compare PPO-family runs we pair that with bootstrap intervals, permutation tests, and Cohen's $d$ so we do not overfit a table to one lucky seed \cite{efron1994introduction,good2005permutation}.

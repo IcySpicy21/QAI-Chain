@@ -1,14 +1,8 @@
 \section{Reproducibility Checklist}
 
-\begin{itemize}
-    \item \textbf{Code availability:} all experiment and table-generation scripts are included in the repository.
-    \item \textbf{Determinism controls:} fixed seed sets are used for publication-scale runs.
-    \item \textbf{Artifact generation:} JSON and markdown artifacts are generated directly from executable scripts.
-    \item \textbf{Table provenance:} LaTeX tables are generated from artifact files via a dedicated script.
-    \item \textbf{Validation gates:} linting, type checks, tests, and runtime health checks are automated.
-\end{itemize}
+Code for the experiments and for regenerating tables lives in the repo. Seeds are fixed for the publication-scale runs so you can diff two branches without rerolling noise. JSON and markdown artifacts are emitted straight from scripts; LaTeX tables are generated from those files rather than hand-typed. CI runs lint, types, tests, and a few health checks so obvious foot-guns fail early.
 
-The end-to-end workflow is:
+The long path from raw logs to camera-ready tables looks like this:
 \begingroup
 \scriptsize
 \begin{verbatim}
@@ -32,22 +26,20 @@ artifacts.py
 \endgroup
 
 \paragraph{Provenance policy.}
-All quantitative manuscript assets are generated from stored artifacts; manual number entry is minimized. This improves traceability and supports exact regeneration when code or protocol settings change.
+We tried to avoid ``magic numbers'' in \texttt{.tex}: if a digit appears in the main text, it should trace back to an artifact file. That habit hurts when you refactor code, but it pays back the first time a reviewer asks for a regeneration.
 
 \paragraph{One-command replication.}
-For this repository, a single command is provided:
+For day-to-day checks there is a shorter entry point:
 \begingroup
 \scriptsize
 \begin{verbatim}
 make reproduce
 \end{verbatim}
 \endgroup
-This target runs the artifact-generation scripts used by the main manuscript tables and figures (including constrained transfer, uncertainty, efficiency, adversarial perturbation, and qubit-scaling artifacts).
-This one-command path is a core subset pipeline for the primary transfer and mechanism-focused artifacts on this host. The extended script list above remains the full regeneration workflow for all auxiliary analyses.
+That target runs the subset of generators behind the main tables and figures (constrained transfer, uncertainty, efficiency, adversarial perturbation, qubit scaling). The longer script list above is still the full kitchen-sink pipeline if you want every auxiliary plot.
 
 \paragraph{Checklist links.}
-The reproducibility checklist used for this paper is versioned in the repository's docs directory as the reproducibility harness file.
-Venue-specific submission checklists are tracked at:
+Venue-style checklists are checked in under \texttt{docs/} if you need wording for a particular submission:
 \begin{itemize}
     \item \texttt{docs/NEURIPS\_SUBMISSION\_CHECKLIST.md}
     \item \texttt{docs/ICLR\_SUBMISSION\_CHECKLIST.md}
@@ -56,6 +48,6 @@ Venue-specific submission checklists are tracked at:
 Code and artifacts are available upon request.
 
 \paragraph{Environment notes.}
-The reference environment uses Python with fixed seed sets and deterministic script ordering. Although strict bitwise reproducibility across all hardware is not guaranteed, protocol-level reproducibility is enforced through documented commands, structured outputs, and validation checks.
+Python with pinned seeds and deterministic script order is the reference stack. Bit-identical floats across machines are not a promise we make; protocol-level reproducibility \emph{is}---commands, outputs, and validation hooks are documented.
 
-This reproducibility framing aligns with current deployment governance guidance and standards updates through 2024--2025 \cite{nistairmf2023,nistcsf2024}.
+The checklist framing here matches how NIST and related bodies talk about AI and cyber risk management in 2024--2025 guidance \cite{nistairmf2023,nistcsf2024}.

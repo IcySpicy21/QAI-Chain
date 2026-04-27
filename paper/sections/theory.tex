@@ -1,6 +1,6 @@
 \section{Theory: Safety and Stability Guarantees}
 
-This section formalizes the mechanism-level guarantees of the proposed controller under explicit assumptions. The intent is to clarify why the architecture behaves as observed in simulation, not to claim assumption-free optimality theorems for all deployment settings.
+This section states what we can actually prove about the controller under assumptions that are stronger than deployment reality. The point is to connect the simulation behavior to a small set of formal knobs---not to pretend the assumptions cover every datacenter failure mode.
 
 Let $s_t$ be the observed state, $a_t^{\pi}$ the learned policy action, $a_t^{h}$ the fallback heuristic action, and $u_q(s_t)$ the quantum-inspired uncertainty estimate. Let the switching rule be
 \[

@@ -1,11 +1,12 @@
 \section{System Design}
 
-The main system claim is a safe RL control loop with compact uncertainty estimation, while blockchain serves as a deployment-time audit substrate. For clarity, the online decision path is:
+The runtime story is simple to draw even if the implementation is not: telemetry in, policy proposes something, an uncertainty gate may veto it, a shield always gets the last word, then the actuators see a bounded action. Blockchain shows up after the fact as an append-only receipt if you want multi-party review.
+
 \[
 \text{state telemetry} \rightarrow \text{policy proposal} \rightarrow \text{uncertainty gate} \rightarrow \text{shield} \rightarrow \text{executed action}.
 \]
 
-Audit records are committed to chain as a verifiable log after execution. This division keeps the core method in the RL/safety domain while preserving multi-party provenance when control actions are reviewed by mutually untrusted participants.
+Commits land on chain once an action is finalized so the adaptive bits stay in Python/Sim and the ledger stays a witness, not a hot path for gradient math.
 
 \subsection{System Diagram}
 
@@ -18,7 +19,8 @@ Audit records are committed to chain as a verifiable log after execution. This d
 
 \subsection{Data and Control Flow}
 
-Transaction and peer events update chain state through RPC and validation logic. Governance telemetry is encoded into a compact vector, and the controller emits bounded actions for difficulty, block size, and gas limit:
+RPC and validation code advance ledger state from peer and transaction events. The controller reads a compressed governance vector and emits bounded knobs (difficulty, block size, gas limit). The diagram is the same idea as above, just drawn with the shield spelled out:
+
 \begin{equation}
 \begin{aligned}
 \text{State telemetry} &\rightarrow \text{policy proposal} \rightarrow \text{uncertainty gate} \\
@@ -26,14 +28,12 @@ Transaction and peer events update chain state through RPC and validation logic.
 \end{aligned}
 \end{equation}
 
-The uncertainty gate can route to deterministic fallback before execution; the shield can reject or clamp invalid actions. This paper's performance claims are tied to that gated-and-shielded control path. Extended blockchain architecture detail is provided in the appendix.
+The gate may punt to a heuristic before execution; the shield may clamp or reject. Numbers in the paper all assume that gated-and-shielded path. Appendix material carries the extra protocol detail if you care about receipts and Merkle layouts.
 
 \subsection{API Contracts}
 
-RPC endpoints use typed request/response schemas. Invalid payloads are rejected and negative-path contract tests cover malformed or missing fields.
-
-Contract tests are the boundary between protocol logic and adaptive governance logic.
+RPC payloads are typed; garbage-in gets a hard error. We keep negative-path tests around malformed fields so the adaptive layer cannot silently widen the contract surface.
 
 \subsection{Operational Guardrails}
 
-Deployment reliability depends on typed interfaces, contract-tested RPC boundaries, and deterministic control handoff between policy, gate, and shield. These controls reduce interface-level failure modes and keep execution behavior auditable across nodes.
+Typed interfaces, those RPC tests, and a deterministic ordering between policy, gate, and shield are what keep multi-node runs from drifting into ``works on my laptop'' territory. None of that is novel science, but it is what makes the behavior legible when something breaks at 2\,am.

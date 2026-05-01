@@ -1,36 +1,24 @@
-\documentclass[11pt]{article}
+\documentclass[10pt,conference]{IEEEtran}
 
-\usepackage[margin=1in]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{lmodern}
-\usepackage{microtype}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{float}
-\usepackage{subcaption}
 \usepackage{placeins}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{hyperref}
-\usepackage{natbib}
+\usepackage[numbers,sort&compress]{natbib}
 
 \hypersetup{
-  colorlinks=true,
-  linkcolor=blue,
-  citecolor=teal,
-  urlcolor=blue
+  hidelinks
 }
 
 \title{Uncertainty-Gated Safe RL with Quantum-Inspired Parameter-Efficient Estimation for Non-Stationary Control}
 
-\author{
-SHIVANG GUPTA\\
-Indian Institute of Technology Roorkee
-}
-
-\date{}
+\author{\IEEEauthorblockN{Shivang Gupta}\\\IEEEauthorblockA{Indian Institute of Technology Roorkee}}
 
 \begin{document}
 
@@ -40,10 +28,10 @@ Indian Institute of Technology Roorkee
 \input{sections/introduction}
 \input{sections/system}
 \input{sections/method}
-\input{sections/theory}
 \input{sections/experimental_setup}
 \input{sections/results}
 \input{sections/discussion}
+\input{sections/threat_model}
 \input{sections/limitations}
 \input{sections/ethics}
 \input{sections/reproducibility}
@@ -55,7 +43,7 @@ Indian Institute of Technology Roorkee
 \input{sections/appendix_deployment_costs}
 \input{sections/appendix_qubit_scaling}
 
-\bibliographystyle{plainnat}
+\bibliographystyle{IEEEtran}
 \bibliography{references}
 
 \end{document}

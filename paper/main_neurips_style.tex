@@ -1,9 +1,37 @@
-\documentclass[11pt]{article}
+\documentclass{article}
 
-\usepackage[margin=1in]{geometry}
-\usepackage[T1]{fontenc}
+% Official NeurIPS template uses neurips_<year>.sty.
+% This file prefers the official style when available and otherwise falls back
+% to a close article layout so local builds do not break.
+\newif\ifneuripsofficial
+\neuripsofficialfalse
+\IfFileExists{neurips_2026.sty}{
+  \usepackage[final]{neurips_2026}
+  \neuripsofficialtrue
+}{
+  \IfFileExists{neurips_2025.sty}{
+    \usepackage[final]{neurips_2025}
+    \neuripsofficialtrue
+  }{
+    \IfFileExists{neurips_2024.sty}{
+      \usepackage[final]{neurips_2024}
+      \neuripsofficialtrue
+    }{
+      \IfFileExists{neurips_2023.sty}{
+        \usepackage[final]{neurips_2023}
+        \neuripsofficialtrue
+      }{
+        \usepackage[margin=1in]{geometry}
+      }
+    }
+  }
+}
+
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\ifneuripsofficial\else
 \usepackage{lmodern}
+\fi
 \usepackage{microtype}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
@@ -14,21 +42,21 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{hyperref}
+\usepackage{url}
 \usepackage{natbib}
 
+\ifneuripsofficial\else
 \hypersetup{
   colorlinks=true,
   linkcolor=blue,
   citecolor=teal,
   urlcolor=blue
 }
+\fi
 
 \title{Uncertainty-Gated Safe RL with Quantum-Inspired Parameter-Efficient Estimation for Non-Stationary Control}
 
-\author{
-SHIVANG GUPTA\\
-Indian Institute of Technology Roorkee
-}
+\author{Shivang Gupta\\Indian Institute of Technology Roorkee}
 
 \date{}
 
@@ -40,10 +68,10 @@ Indian Institute of Technology Roorkee
 \input{sections/introduction}
 \input{sections/system}
 \input{sections/method}
-\input{sections/theory}
 \input{sections/experimental_setup}
 \input{sections/results}
 \input{sections/discussion}
+\input{sections/threat_model}
 \input{sections/limitations}
 \input{sections/ethics}
 \input{sections/reproducibility}

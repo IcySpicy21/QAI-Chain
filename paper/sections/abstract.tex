@@ -1,9 +1,9 @@
 \begin{abstract}
-Drift does not always show up first in mean reward. Often the curve still looks polite while the controller is already juddering---noisy value estimates plus twitchy actions---which hurts if you care about bursts, attacks, or latency spikes instead of averaging over friendly weeks.
+Safe RL systems usually fail when regime shifts are faster than policy adaptation. In governance-like control loops, that failure does not first appear as lower average reward; it appears as brittle decisions under uncertainty.
 
-The stack we ship is a thin PPO-sidecar that only wakes at decision time. One uncertainty scalar routes between the learned action and a fixed heuristic; a shield downstream clips or rejects before the plant sees anything. Beating every baseline on return is out of scope here: we care how the safety--stability trade moves once you stop executing the policy raw. A classically simulated six-qubit-style readout supplies the routing score without ensemble-sized memory.
+We study an uncertainty-gated safe RL controller that routes PPO actions through a calibrated uncertainty gate and a deterministic shield. The efficiency mechanism is a compact, classically simulated VQC-style uncertainty head used as a parameter-efficient non-linear embedding.
 
-Evidence is split on purpose: thirty-seed Safety Gym runs for constrained sanity (task IDs in setup), fifty-seed governance controller grids for stress, plus appendix sweeps. One ablation row is ugly on purpose---random wins scalar reward against the full stack---because reward alone can lie and we care about violations and tracking when the schedule shifts.
+Our primary empirical evidence comes from standard constrained benchmarks (SafetyPoint\-Goal1-v0 and SafetyHalf\-Cheetah\-Velocity-v1; 30 seeds) and official OmniSafe constrained baselines (50 seeds). Custom governance simulations are treated as stress tests, not as the sole source of external validity.
 
-Numbers in the tables trace to version-controlled artifacts; the reproducibility section lists how to regenerate them from the repository.
+We also report a negative result directly: in one custom ablation workload, full-system reward (-1264.90) is below random (-1232.33). We keep this result because it clarifies what the method is and is not optimizing: the method improves control stability and safety-oriented behavior under shift, but does not guarantee reward dominance in every stylized reward design. The central claim is therefore parameter efficiency with comparable safety behavior rather than universal return superiority. In matched efficiency experiments, the compact architecture achieves a 166.89$\times$ parameter reduction while remaining competitive on safety-oriented metrics.
 \end{abstract}

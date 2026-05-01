@@ -1,9 +1,21 @@
 \section{Limitations}
 
-Governance simulators stay toy-scale on purpose---no realistic peer churn, no endogenous liquidity games, no mempool microstructure worth the name. The VQC-style block and audit hooks are lab prototypes, not hardened services. Latency came from one workstation profile, not a GPU sweep menu.
+This study has several important limitations:
+\begin{itemize}
+    \item The governance simulators are intentionally simplified and do not yet model full peer-network dynamics, endogenous market adaptation, or realistic transaction-arrival microstructure.
+    \item The quantum-inspired uncertainty module and audit pipeline are research prototypes, not production-hardened systems.
+    \item Runtime measurements are single-machine snapshots rather than cross-hardware scaling studies.
+\end{itemize}
 
-Reward shaping can reorder winners (random beating the full stack is the blunt example), so leaning on scalar return alone is silly. Some slices outside the fifty-seed constrained suite still run thinner seed counts. Simulator fidelity caps how far uncertainty and network physics claims travel, and we do not yet model nasty economic adversaries inside mining or tx flows. Baseline coverage stops well short of a 2022--2025 safe-RL catalog.
+\par
+Additional validity risks include:
+\begin{itemize}
+    \item reward misspecification sensitivity under alternate throughput/latency trade-offs (highlighted by the random-vs-full anomaly in one ablation workload),
+    \item moderate sample size in some per-method seed analyses outside the 50-seed constrained-baseline suite,
+    \item simulator realism limits for both uncertainty dynamics and network behavior,
+    \item absence of richer economic-adversary models in mining and transaction dynamics.
+\end{itemize}
 
-Corollary~2 needs bounded perturbations and clean assumptions; it is not a shield against arbitrary sensor pathology.
+The observation-noise robustness claim in Corollary~2 is therefore best interpreted as a bounded-perturbation guarantee under model assumptions, not as a blanket guarantee under arbitrary sensing failures.
 
-Safety Gym gives standard constrained-control cover; it does not license plugging this straight into a live chain without the gaps above getting closed.
+The standard constrained benchmarks improve external validity, but they do not by themselves establish readiness for live governance deployment. These limitations define immediate future work rather than hidden assumptions.
